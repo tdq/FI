@@ -16,27 +16,73 @@ mc100.prototype.launch = function() {
 };
 
 mc100.prototype.step = function() {
-  var cmd = this.memory[this.pos++];
+  var cmd = this.getValue(this.pos++);
 
   switch(cmd) {
+  	// mov
     case 1:
-      addr1 = this.memory[this.pos++];
-      addr2 = this.memory[this.pos++];
-      this.memory[addr2] = this.memory[addr1];
-      break;
+    	addr1 = this.getValue(this.pos++);
+    	addr2 = this.getValue(this.pos++);
+    	this.setValue(addr2, this.getValue(addr1));
+    	break;
+    // add
     case 2:
-      addr1 = this.memory[this.pos++];
-      this.memory[this.accAddr] += this.memory[addr1];
-      break;
-    case 3: break;
-    case 4: break;
-    case 5: break;
-    case 6: break;
+    	addr1 = this.getValue(this.pos++);
+    	this.setValue(this.accAddr, this.getValue(this.accAddr) + this.getValue(addr1));
+    	break;
+    // mul
+    case 3: 
+    	addr1 = this.getValue(this.pos++);
+        this.setValue(this.accAddr, this.getValue(this.accAddr) * this.getValue(addr1));
+    	break;
+    // sub
+    case 4: 
+    	addr1 = this.getValue(this.pos++);
+        this.setValue(this.accAddr, this.getValue(this.accAddr) - this.getValue(addr1));
+    	break;
+    // div
+    case 5: 
+    	addr1 = this.getValue(this.pos++);
+        this.setValue(this.accAddr, this.getValue(this.accAddr) / this.getValue(addr1));
+    	break;
+    // not
+    case 6: 
+        this.setValue(this.accAddr, this.getValue(this.accAddr) != 0 ? 100: 0);
+        break;
+    // nop
     case 7: break;
-    case 8: break;
-    case 9: break;
-    case 10: break;
-    case 11: break;
+    // jmp
+    case 8: 
+    	this.pos = this.getAddr(this.pos++);
+    	break;
+    // teq
+    case 9: 
+    	addr1 = this.getValue(this.pos++);
+    	if(this.getValue(this.accAddr) == this.getValue(addr1))
+    		this.pos = this.getAddr(this.pos);
+    	else
+    		this.pos = this.getAddr(this.pos+1);
+    		
+    	break;
+    // tgt
+    case 10: 
+    	addr1 = this.getValue(this.pos++);
+    	if(this.getValue(this.accAddr) < this.getValue(addr1))
+    		this.pos = this.getAddr(this.pos);
+    	else
+    		this.pos = this.getAddr(this.pos+1);
+    	
+    	break;
+    // tlt
+    case 11: 
+    	addr1 = this.getValue(this.pos++);
+    	if(this.getValue(this.accAddr) > this.getValue(addr1))
+    		this.pos = this.getAddr(this.pos);
+    	else
+    		this.pos = this.getAddr(this.pos+1);
+    	
+    	break;
+    // ret
     case 0: return false; break;
     default: throw new Error("Unknown command: "+cmd+" at "+this.pos);
   }
@@ -46,13 +92,29 @@ mc100.prototype.step = function() {
   return true;
 };
 
+mc100.prototype.getAddr = function(addr) {
+	if(addr < 0 || addr > this.maxPos) {
+		throw new Error("Undefined addres: "+addr);
+	}
+	
+	return addr;
+}
+
+mc100.prototype.getValue = function(addr) {
+	return this.memory[this.getAddr(addr)];
+}
+
+mc100.prototype.setValue = function(addr, val) {
+	this.memory[this.getAddr(addr)] = val;
+}
+
 mc100.prototype.reset = function() {
   this.pos = 3;
   this.state = null;
 }
 
 mc100.prototype.setProgram = function(program) {
-  this.memory = compile(program, this.memOffset, this.maxPos);
+  this.memory = compile(program, this.memOffset, this.maxPos, {"acc": this.accAddr, "p0": this.p0Addr, "p1": this.p1Addr});
 }
 
 mc = new mc100();
@@ -62,7 +124,6 @@ function setCommands(elem) {
 }
 
 function launch() {
-  //mc.setCommands(document.querySelector("mc100 textarea").value);
   mc.launch();
 }
 
@@ -74,9 +135,9 @@ function reset() {
   mc.reset();
 }
 
-function compile(programm, ofset, maxPos) {
+function compile(programm, ofset, maxPos, registers) {
   var commands = [];
-  var labels = {"acc": 0, "p0": 1, "p1": 2};
+  var labels = {};
 
   if(programm == null)
     return [];
@@ -117,13 +178,14 @@ function compile(programm, ofset, maxPos) {
     }
   }
 
-  return writeMemory(commands, labels, ofset, maxPos);
+  return writeMemory(commands, registers, labels, ofset, maxPos);
 }
 
-function writeMemory(commands, labels, ofset, maxPos) {
+function writeMemory(commands, registers, labels, ofset, maxPos) {
   var programPos = ofset;
   var dataPos = maxPos;
   var memory = [];
+  var variables = {};
 
   for(var i=0; i<commands.length; ++i) {
     var command = commands[i];
@@ -134,11 +196,15 @@ function writeMemory(commands, labels, ofset, maxPos) {
       var addr = 0;
 
       if(args[j] in labels) {
-        addr = labels[args[j]];
+    	  addr = labels[args[j]];
+      } else if(args[j] in registers) {
+    	  addr = registers[args[j]];
+      } else if(args[j] in variables) {
+    	  addr = variables[args[j]];
       } else if(isNumber(args[j])) {
-        memory[dataPos] = parseInt(args[j]);
-        addr = dataPos--;
-        labels[args[j]] = addr;
+    	  memory[dataPos] = parseInt(args[j]);
+    	  addr = dataPos--;
+    	  variables[args[j]] = addr;
       }
 
       memory[programPos++] = addr;
