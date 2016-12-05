@@ -1,0 +1,33 @@
+mc100 {
+  display: block;
+  border: 1px solid #aaa;
+  background-color: #111;
+  width: 200px;
+  position: relative;
+}
+
+acc {
+  display: block;
+  border 1px solid #aaa;
+  width: 50px;
+  height: 20px;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  background-color: #ccc;
+}
+
+mc100 textarea {
+  background-color: #ccc;
+}
+
+state {
+  display: block;
+  border 1px solid #aaa;
+  width: 50px;
+  height: 20px;
+  position: absolute;
+  right: 5px;
+  top: 30px;
+  background-color: #ccc;
+}

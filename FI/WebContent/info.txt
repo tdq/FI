@@ -1,0 +1,6 @@
+Flat memory model
+
+00  ACC
+02  ...
+..
+63  ...
