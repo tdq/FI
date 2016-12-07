@@ -53,7 +53,7 @@ mc100.prototype.step = function() {
     case 7: break;
     // jmp
     case 8: 
-    	this.pos = this.getAddr(this.pos++);
+    	this.pos = this.getValue(this.pos++);
     	break;
     // teq
     case 9: 
@@ -143,7 +143,7 @@ function compile(programm, ofset, maxPos, registers) {
     return [];
 
   var lines = programm.split("\n");
-  var pos = 0;
+  var pos = ofset;
 
   for(var i=0; i<lines.length; ++i) {
     var line = lines[i].trim();
@@ -161,18 +161,18 @@ function compile(programm, ofset, maxPos, registers) {
     } else if(parts.length > 0) {
       var command = parts[0];
       switch(command) {
-        case "mov": commands.push({cmd: 1, args: [parts[1], parts[2]]}); break;
-        case "add": commands.push({cmd: 2, args: [parts[1]]}); break;
-        case "mul": commands.push({cmd: 3, args: [parts[1]]}); break;
-        case "sub": commands.push({cmd: 4, args: [parts[1]]}); break;
-        case "div": commands.push({cmd: 5, args: [parts[1]]}); break;
-        case "not": commands.push({cmd: 6, args: []}); break;
-        case "nop": commands.push({cmd: 7, args: []}); break;
-        case "jmp": commands.push({cmd: 8, args: [parts[1]]}); break;
-        case "teq": commands.push({cmd: 9, args: [parts[1], parts[2]]}); break;
-        case "tgt": commands.push({cmd: 10, args: [parts[1], parts[2]]}); break;
-        case "tlt": commands.push({cmd: 11, args: [parts[1], parts[2]]}); break;
-        case "ret": commands.push({cmd: 0, args: []}); break;
+        case "mov": commands.push({cmd: 1, args: [parts[1], parts[2]]}); pos += 3; break;
+        case "add": commands.push({cmd: 2, args: [parts[1]]}); pos += 2; break;
+        case "mul": commands.push({cmd: 3, args: [parts[1]]}); pos += 2; break;
+        case "sub": commands.push({cmd: 4, args: [parts[1]]}); pos += 2; break;
+        case "div": commands.push({cmd: 5, args: [parts[1]]}); pos += 2; break;
+        case "not": commands.push({cmd: 6, args: []}); pos++; break;
+        case "nop": commands.push({cmd: 7, args: []}); pos++; break;
+        case "jmp": commands.push({cmd: 8, args: [parts[1]]}); pos += 2; break;
+        case "teq": commands.push({cmd: 9, args: [parts[1]]}); pos += 2; break;
+        case "tgt": commands.push({cmd: 10, args: [parts[1]]}); pos += 2; break;
+        case "tlt": commands.push({cmd: 11, args: [parts[1]]}); pos += 2; break;
+        case "ret": commands.push({cmd: 0, args: []}); pos++; break;
         default: throw new Error("Unknown command: "+command+" line "+i);
       }
     }
@@ -205,6 +205,8 @@ function writeMemory(commands, registers, labels, ofset, maxPos) {
     	  memory[dataPos] = parseInt(args[j]);
     	  addr = dataPos--;
     	  variables[args[j]] = addr;
+      } else {
+    	  throw new Error("Unknown argument: "+args[j]);
       }
 
       memory[programPos++] = addr;
