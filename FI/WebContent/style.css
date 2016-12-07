@@ -1,5 +1,5 @@
 mc100 {
-  display: block;
+  display: inline-block;
   border: 1px solid #aaa;
   background-color: #111;
   width: 200px;
