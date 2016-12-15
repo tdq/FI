@@ -1,16 +1,13 @@
-mc1 = new mc100();
-mc2 = new mc100();
+var mc1;
+var mc2;
 
-mc1.onValueChange(listenPortMc1);
-mc2.onValueChange(listenPortMc2);
+window.addEventListener('WebComponentsReady', function() {
+	mc1 = document.querySelector("#mc1");
+	mc2 = document.querySelector("#mc2");
 
-function setCommands(mc, elem) {
-  mc.setProgram(elem.value);
-}
-
-function launch() {
-	mc1.launch();
-}
+	mc1.onValueChange(listenPortMc1);
+	mc2.onValueChange(listenPortMc2);
+});
 
 function step() {
 	setPortValue(mc1, 'p0', "p0");

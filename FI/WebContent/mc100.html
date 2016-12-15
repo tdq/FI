@@ -1,0 +1,93 @@
+<template>
+	<style>
+		.mc100 {
+		  display: inline-block;
+		  border: 1px solid #aaa;
+		  background-color: #111;
+		  width: 200px;
+		  position: relative;
+		}
+		
+		acc {
+		  display: block;
+		  border 1px solid #aaa;
+		  width: 50px;
+		  height: 20px;
+		  position: absolute;
+		  right: 5px;
+		  top: 5px;
+		  background-color: #ccc;
+		  text-align: center;
+		}
+		
+		mc100 textarea {
+		  background-color: #ccc;
+		}
+		
+		state {
+		  display: block;
+		  border 1px solid #aaa;
+		  width: 50px;
+		  height: 20px;
+		  position: absolute;
+		  right: 5px;
+		  top: 30px;
+		  background-color: #ccc;
+		}		
+	</style>
+	
+	<div class="mc100">
+		<textarea cols="20" rows="9" draggable="false" id = "editor"></textarea>
+	    <acc></acc>
+	    <state></state>
+    </div>
+</template>
+
+<script type="text/javascript" src="mc100.js"></script>
+
+<script>
+(function() {
+	var tmpl = document._currentScript.ownerDocument.querySelector('template');
+	var Element = Object.create(HTMLElement.prototype);
+	
+	Element.createdCallback = function() {
+		this.shadowRoot = this.createShadowRoot();
+		var clone = document.importNode(tmpl.content, true);
+		this.shadowRoot.appendChild(clone);
+		
+		this.controller = new mc100();
+		
+		var self = this;
+		
+		this.shadowRoot.querySelector("#editor").onchange = function() {
+			self.controller.setProgram(this.value);
+		}
+		
+		this.controller.onAccChange(function(val) {
+			self.shadowRoot.querySelector("acc").innerHTML = val;
+		});
+	}
+	
+	Element.step = function() {
+		return this.controller.step();
+	}
+
+	Element.reset = function() {
+		this.controller.reset();
+	}
+
+	Element.setPortValue = function(port, value) {
+		this.controller.setPortValue(port, value);
+	}
+
+	Element.getPortValue = function(port) {
+		return this.controller.getPortValue(port);
+	}
+
+	Element.onValueChange = function(listener) {
+		this.controller.valueChangeListener = listener;
+	}
+	
+	var mc100Comp = document.registerElement('mc-100', {prototype: Element});
+})();
+</script>

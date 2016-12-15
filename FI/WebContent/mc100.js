@@ -111,11 +111,13 @@ mc100.prototype.getValue = function(addr) {
 	return this.memory[this.getAddr(addr)];
 }
 
-mc100.prototype.setValue = function(addr, val) {
-	if(!isNumber(val))
-		throw new Error("Wrong value (only integers accepted): "+val);
+mc100.prototype.setValue = function(addr, value) {
+	if(!isNumber(value))
+		throw new Error("Wrong value (only integers accepted): "+value);
 	
-	this.memory[this.getAddr(addr)] = parseInt(val);
+	var val = parseInt(value);
+	
+	this.memory[this.getAddr(addr)] = val;
 	var self = this;
 	
 	if(this.hasOwnProperty("valueChangeListener")) {
@@ -127,7 +129,12 @@ mc100.prototype.setValue = function(addr, val) {
 		};
 		
 		if(port != null)
-			this.valueChangeListener(port, parseInt(val));
+			this.valueChangeListener(port, val);
+	}
+	
+	if(this.hasOwnProperty("accChangeListener")) {
+		if(addr == this.accAddr)
+			this.accChangeListener(val);
 	}
 }
 
@@ -159,4 +166,8 @@ mc100.prototype.getPortValue = function(port) {
 
 mc100.prototype.onValueChange = function(listener) {
 	this.valueChangeListener = listener;
+}
+
+mc100.prototype.onAccChange = function(listener) {
+	this.accChangeListener = listener;
 }

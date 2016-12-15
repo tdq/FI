@@ -2,24 +2,21 @@
 <html>
   <head>
     <title>FI</title>
+    <!-- 
+    <script type = "text/javascript" src = "audio.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css"></link>
+    -->
     <script type = "text/javascript" src = "lib.js"></script>
-    <script type = "text/javascript" src = "mc100.js"></script>
+    <script type = "text/javascript" src = "webcomponents-lite.min.js"></script>
+    <link rel = "import" href="mc100.html">
+    
     <script type = "text/javascript" src = "audio.js"></script>
     <script type = "text/javascript" src = "main.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css"></link>
   </head>
   <body>
-    <mc100>
-      <textarea cols="20" rows="9" draggable="false" onchange="setCommands(mc1, this)"></textarea>
-      <acc></acc>
-      <state></state>
-    </mc100>
-    <mc100>
-      <textarea cols="20" rows="9" draggable="false" onchange="setCommands(mc2, this)"></textarea>
-      <acc></acc>
-      <state></state>
-    </mc100>
-    <br>
+     <mc-100 id="mc1"></mc-100>
+     <mc-100 id="mc2"></mc-100>
+     <br>
     <input type="text" placeholder="p0" id="p0" value="0">
     <input type="text" placeholder="p1" id="p1" value="0">
     <input type="text" placeholder="p2" id="p2" value="0">
